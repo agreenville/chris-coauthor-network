@@ -1,0 +1,23 @@
+# Source documents (not for public repo)
+Chris_pubs.docx
+*.docx
+
+# Temporary / system files
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
+*.pyo
+
+# Python virtual environments
+venv/
+.env
+
+# R session files
+.Rhistory
+.RData
+.Rproj.user/
+
+# Large binary outputs (regenerate from scripts)
+# Uncomment below if you prefer not to track these:
+# data/*.pkl
