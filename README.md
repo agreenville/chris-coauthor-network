@@ -1,5 +1,7 @@
 # Chris Dickman Co-authorship Network
 
+🔗 **[View the interactive network](https://agreenville.github.io/chris-coauthor-network/chris_coauthor_network.html)**
+
 An interactive visualisation of co-authorship patterns across Chris Dickman's publication record, built from ~643 publications spanning his career at the University of Sydney.
 
 ## Overview
