@@ -52,6 +52,8 @@ input[type=range]{width:110px;accent-color:#e0c060;cursor:pointer}
               color:#99bbdd;font-size:0.72rem;cursor:pointer}
 #show-all-btn:hover{background:#203860}
 #filter-note{font-size:0.64rem;color:#4a5a6a;margin-top:8px;line-height:1.4}
+#github-link{display:block;margin-top:14px;padding-top:10px;border-top:1px solid #1a2a40;font-size:0.67rem;color:#4a7aaa;text-decoration:none;line-height:1.5}
+#github-link:hover{color:#56B4E9;text-decoration:underline}
 #network{flex:1;cursor:default}
 #network.drag-mode{cursor:grab}
 #network.dragging{cursor:grabbing}
@@ -210,6 +212,7 @@ input[type=range]{width:110px;accent-color:#e0c060;cursor:pointer}
     <div id="legend-items"></div>
     <button id="show-all-btn" onclick="clearHighlight()">&#8635; Show all themes</button>
     <div id="filter-note">Click a theme to isolate it</div>
+    <a id="github-link" href="https://github.com/agreenville/chris-coauthor-network" target="_blank" rel="noopener">&#128196; View project on GitHub<br><span style="color:#3a5a7a;font-size:0.62rem">Source code &amp; methodology</span></a>
   </div>
   <div id="network"></div>
 </div>
