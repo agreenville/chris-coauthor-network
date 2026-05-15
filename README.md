@@ -54,7 +54,10 @@ python scripts/assign_themes.py
 # 3. Generate interactive HTML
 python scripts/make_community_html.py
 
-# 4. (Optional) Generate static PNG
+# 4. Regenerate the author CSV (papers_with_chris, total_papers, theme)
+python scripts/make_authors_csv.py
+
+# 5. (Optional) Generate static PNG
 python scripts/make_png.py
 ```
 
