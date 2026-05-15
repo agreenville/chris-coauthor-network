@@ -316,6 +316,200 @@ function repositionBridgeNodes(){
 }
 
 
+
+// ── cluster tightening ─────────────────────────────────────────────────────────
+// Scale within-cluster offsets so nodes pack tighter around their centroid.
+// factor=1 → no change; factor=0.5 → halve the spread.
+function tightenClusters(factor){
+  recomputeCentroids();
+  ALL_NODES.forEach(function(n){
+    if(n.is_chris) return;
+    var cent=commCentroids[n.community]||{x:n.x,y:n.y};
+    n.x=cent.x+(n.x-cent.x)*factor;
+    n.y=cent.y+(n.y-cent.y)*factor;
+  });
+  recomputeCentroids();
+}
+
+// ── bridge nodes at cluster edge ───────────────────────────────────────────────
+// For nodes linked to other communities: keep them inside their own cluster but
+// move them to its edge, facing the connected cluster(s). This makes cross-links
+// much more visible while keeping the thematic grouping intact.
+function positionBridgeNodesAtEdge(){
+  // Weighted cross-community edge counts per node
+  var crossW={};
+  ALL_EDGES.forEach(function(e){
+    var fn=nodeMap[e.from],tn=nodeMap[e.to];
+    if(!fn||!tn||fn.is_chris||tn.is_chris) return;
+    if(fn.community===tn.community) return;
+    var w=e.weight||1;
+    if(!crossW[e.from]) crossW[e.from]={};
+    if(!crossW[e.to])   crossW[e.to]={};
+    crossW[e.from][tn.community]=(crossW[e.from][tn.community]||0)+w;
+    crossW[e.to][fn.community]  =(crossW[e.to][fn.community]  ||0)+w;
+  });
+
+  // Cluster radius = max distance from centroid within that community
+  var clusterR={};
+  for(var cc in commCentroids){
+    var cent=commCentroids[cc], maxD=0;
+    ALL_NODES.forEach(function(n){
+      if(n.is_chris||n.community!=cc) return;
+      var d=Math.sqrt(Math.pow(n.x-cent.x,2)+Math.pow(n.y-cent.y,2));
+      if(d>maxD) maxD=d;
+    });
+    clusterR[cc]=Math.max(maxD,30);
+  }
+
+  ALL_NODES.forEach(function(n){
+    if(n.is_chris) return;
+    var ce=crossW[n.id]; if(!ce) return;
+    var ownCent=commCentroids[n.community]; if(!ownCent) return;
+    // Weighted direction toward connected cluster centroids
+    var dirX=0,dirY=0,totalW=0;
+    for(var other in ce){
+      var otherCent=commCentroids[parseInt(other)]; if(!otherCent) continue;
+      var w=ce[other];
+      var dx=otherCent.x-ownCent.x, dy=otherCent.y-ownCent.y;
+      var d=Math.sqrt(dx*dx+dy*dy); if(d<0.001) continue;
+      dirX+=w*dx/d; dirY+=w*dy/d; totalW+=w;
+    }
+    if(!totalW||(dirX===0&&dirY===0)) return;
+    var dl=Math.sqrt(dirX*dirX+dirY*dirY);
+    dirX/=dl; dirY/=dl;
+    // Place at 88% of cluster radius in the bridge direction
+    var r=clusterR[n.community]*0.88;
+    n.x=ownCent.x+dirX*r;
+    n.y=ownCent.y+dirY*r;
+  });
+  recomputeCentroids();
+}
+
+// ── overlap removal ────────────────────────────────────────────────────────────
+// Iteratively push overlapping nodes apart using a spatial-hash grid.
+// Chris node participates in collision detection but is never moved.
+function removeOverlaps(maxIter){
+  maxIter=maxIter||200;
+  var PAD=6;   // minimum gap between node edges
+  var CELL=130; // grid cell size (> max node diameter)
+  function nR(n){
+    return n.is_chris?54:Math.max(10,Math.min(50,10+Math.sqrt(n.chris_count/MAX_CHRIS)*40));
+  }
+  function cellKey(x,y){ return Math.floor(x/CELL)+','+Math.floor(y/CELL); }
+
+  for(var iter=0;iter<maxIter;iter++){
+    var grid={};
+    ALL_NODES.forEach(function(n){
+      var k=cellKey(n.x,n.y);
+      if(!grid[k]) grid[k]=[];
+      grid[k].push(n);
+    });
+    var moved=false;
+    ALL_NODES.forEach(function(ni){
+      var ci=Math.floor(ni.x/CELL), cj=Math.floor(ni.y/CELL);
+      for(var di=-1;di<=1;di++){
+        for(var dj=-1;dj<=1;dj++){
+          var nbs=grid[(ci+di)+','+(cj+dj)]; if(!nbs) continue;
+          nbs.forEach(function(nj){
+            if(nj.id<=ni.id) return;
+            var minD=nR(ni)+nR(nj)+PAD;
+            var dx=nj.x-ni.x, dy=nj.y-ni.y;
+            var dist2=dx*dx+dy*dy;
+            if(dist2>=minD*minD||dist2<0.0001) return;
+            var dist=Math.sqrt(dist2);
+            var push=(minD-dist)*0.52;
+            var nx=dx/dist*push, ny=dy/dist*push;
+            if(!ni.is_chris){ni.x-=nx;ni.y-=ny;}
+            if(!nj.is_chris){nj.x+=nx;nj.y+=ny;}
+            moved=true;
+          });
+        }
+      }
+    });
+    if(!moved) break;
+  }
+}
+
+
+// ── cluster separation ─────────────────────────────────────────────────────────
+// Treat each community as a circle (radius = max node distance from centroid)
+// and iteratively push overlapping communities apart as rigid bodies.
+// This ensures theme groups don't visually blend into each other.
+function separateClusters(maxIter, padding){
+  maxIter = maxIter||120;
+  padding = padding||40;   // minimum clear gap between cluster edges (px)
+
+  for(var iter=0; iter<maxIter; iter++){
+    recomputeCentroids();
+    var comms=Object.keys(commCentroids).map(Number);
+
+    // Effective radius of each cluster
+    var radii={};
+    comms.forEach(function(ci){
+      var cent=commCentroids[ci], maxD=0;
+      ALL_NODES.forEach(function(n){
+        if(n.is_chris||n.community!=ci) return;
+        var d=Math.sqrt(Math.pow(n.x-cent.x,2)+Math.pow(n.y-cent.y,2));
+        if(d>maxD) maxD=d;
+      });
+      radii[ci]=Math.max(maxD,30);
+    });
+
+    var moved=false;
+    for(var i=0;i<comms.length;i++){
+      for(var j=i+1;j<comms.length;j++){
+        var ci=comms[i], cj=comms[j];
+        var centi=commCentroids[ci], centj=commCentroids[cj];
+        var dx=centj.x-centi.x, dy=centj.y-centi.y;
+        var dist=Math.sqrt(dx*dx+dy*dy);
+        var minD=radii[ci]+radii[cj]+padding;
+        if(dist>=minD||dist<0.001) continue;
+        // Push each cluster half the overlap distance
+        var push=(minD-dist)*0.5;
+        var nx=dx/dist*push, ny=dy/dist*push;
+        ALL_NODES.forEach(function(n){
+          if(n.is_chris||n.community!=ci) return;
+          n.x-=nx; n.y-=ny;
+        });
+        ALL_NODES.forEach(function(n){
+          if(n.is_chris||n.community!=cj) return;
+          n.x+=nx; n.y+=ny;
+        });
+        moved=true;
+      }
+    }
+    if(!moved) break;
+  }
+  recomputeCentroids();
+}
+
+
+// ── rescale layout around Chris ───────────────────────────────────────────────
+// After cluster separation the groups can drift far from Chris.
+// This scales all non-Chris nodes so the furthest node sits at targetRadius
+// from Chris, keeping the overall layout compact and centred on Chris.
+function rescaleAroundChris(targetRadius){
+  var chris=null;
+  ALL_NODES.forEach(function(n){ if(n.is_chris) chris=n; });
+  if(!chris) return;
+  var maxD=0;
+  ALL_NODES.forEach(function(n){
+    if(n.is_chris) return;
+    var d=Math.sqrt(Math.pow(n.x-chris.x,2)+Math.pow(n.y-chris.y,2));
+    if(d>maxD) maxD=d;
+  });
+  if(maxD<0.001) return;
+  var scale=targetRadius/maxD;
+  // Only shrink, never enlarge (if already compact, leave it)
+  if(scale>=1) return;
+  ALL_NODES.forEach(function(n){
+    if(n.is_chris) return;
+    n.x=chris.x+(n.x-chris.x)*scale;
+    n.y=chris.y+(n.y-chris.y)*scale;
+  });
+  recomputeCentroids();
+}
+
 // ── position formula ──────────────────────────────────────────────────────────
 // Applies spread (scales community centroids away from global centre)
 // plus per-community drag offsets.
@@ -435,8 +629,14 @@ function init(){
     var pos=network.getPositions();
     ALL_NODES.forEach(function(n){ if(pos[n.id]){n.x=pos[n.id].x;n.y=pos[n.id].y;} });
     recomputeCentroids();
-    repositionBridgeNodes();
+    tightenClusters(0.55);
+    positionBridgeNodesAtEdge();
+    removeOverlaps(200);
+    separateClusters(120, 30);
+    rescaleAroundChris(580);
+    removeOverlaps(80);
     applyPositions();
+    network.fit({animation:false});
   });
 
   // ── tooltips ──────────────────────────────────────────────────────────────
