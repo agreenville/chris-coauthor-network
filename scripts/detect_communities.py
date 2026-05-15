@@ -5,8 +5,12 @@ import community as community_louvain
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+import pathlib
+ROOT = pathlib.Path(__file__).resolve().parent.parent  # project root
+
+
 # ── Parse doc ────────────────────────────────────────────────────────────────
-doc = docx.Document('/sessions/confident-loving-ritchie/mnt/Chris_coauthor_network/Chris_pubs.docx')
+doc = docx.Document(ROOT / 'Chris_pubs.docx')
 paragraphs = [p.text.strip() for p in doc.paragraphs]
 SECTIONS = {
     'Books and journal theme issues': (2, 57),
@@ -217,7 +221,7 @@ layout_positions = {n: (float(v[0]*SCALE), float(-v[1]*SCALE))
                     for n,v in pos.items()}
 
 # ── Save ─────────────────────────────────────────────────────────────────────
-with open('/sessions/confident-loving-ritchie/mnt/outputs/coauthor_data.pkl','rb') as f:
+with open(ROOT / 'data' / 'coauthor_data.pkl','rb') as f:
     base = pickle.load(f)
 
 save = {**base,
@@ -226,6 +230,6 @@ save = {**base,
         'layout_positions': layout_positions,
         'n_communities': n_communities,
         'OTHER_ID': OTHER_ID}
-with open('/sessions/confident-loving-ritchie/mnt/outputs/community_data.pkl','wb') as f:
+with open(ROOT / 'data' / 'community_data.pkl','wb') as f:
     pickle.dump(save, f)
 print("\nSaved.")

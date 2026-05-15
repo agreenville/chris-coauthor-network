@@ -3,8 +3,12 @@ from collections import defaultdict
 import networkx as nx
 import numpy as np
 
+import pathlib
+ROOT = pathlib.Path(__file__).resolve().parent.parent  # project root
+
+
 # ── reload parsed refs ────────────────────────────────────────────────────────
-doc = docx.Document('/sessions/confident-loving-ritchie/mnt/Chris_coauthor_network/Chris_pubs.docx')
+doc = docx.Document(ROOT / 'Chris_pubs.docx')
 paragraphs = [p.text.strip() for p in doc.paragraphs]
 SECTIONS = {'Books and journal theme issues':(2,57),'Monographs':(57,94),
             'Scientific articles':(148,1045),'Chapters in books':(1045,1330)}
@@ -218,6 +222,6 @@ save = {
     'n_communities': n_communities,
     'OTHER_ID': OTHER_ID,
 }
-with open('/sessions/confident-loving-ritchie/mnt/outputs/community_data.pkl','wb') as f:
+with open(ROOT / 'data' / 'community_data.pkl','wb') as f:
     pickle.dump(save, f)
 print("Saved.")

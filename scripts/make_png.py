@@ -6,7 +6,11 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
 
-with open('/sessions/confident-loving-ritchie/mnt/outputs/coauthor_data.pkl', 'rb') as f:
+import pathlib
+ROOT = pathlib.Path(__file__).resolve().parent.parent  # project root
+
+
+with open(ROOT / 'data' / 'coauthor_data.pkl', 'rb') as f:
     data = pickle.load(f)
 
 chris_coauth_count = data['chris_coauth_count']
@@ -125,7 +129,7 @@ ax.legend(handles=[patch1, patch2, line1, line2],
 ax.axis('off')
 plt.tight_layout()
 
-out_path = '/sessions/confident-loving-ritchie/mnt/outputs/chris_coauthor_network.png'
+out_path = ROOT / 'chris_coauthor_network.png'
 plt.savefig(out_path, dpi=180, bbox_inches='tight',
             facecolor='#1a1a2e', edgecolor='none')
 print(f"PNG saved.")

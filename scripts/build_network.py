@@ -4,7 +4,7 @@ import json
 from collections import defaultdict
 import itertools
 
-doc = docx.Document('/sessions/confident-loving-ritchie/mnt/Chris_coauthor_network/Chris_pubs.docx')
+doc = docx.Document(ROOT / 'Chris_pubs.docx')
 paragraphs = [p.text.strip() for p in doc.paragraphs]
 
 SECTIONS_TO_PARSE = {
@@ -130,7 +130,11 @@ print(f"Top 10: {sorted(chris_coauth_count.items(), key=lambda x: -x[1])[:10]}")
 
 # Save for use in visualisation scripts
 import pickle
-with open('/sessions/confident-loving-ritchie/mnt/outputs/coauthor_data.pkl', 'wb') as f:
+
+import pathlib
+ROOT = pathlib.Path(__file__).resolve().parent.parent  # project root
+
+with open(ROOT / 'data' / 'coauthor_data.pkl', 'wb') as f:
     pickle.dump({
         'chris_coauth_count': dict(chris_coauth_count),
         'pairwise_count': dict(pairwise_count),
