@@ -48,18 +48,21 @@ All scripts are in `scripts/` and should be run in order:
 # 1. Parse publications and build co-authorship counts
 python scripts/build_network.py
 
-# 2. Detect Louvain communities
-python scripts/detect_communities.py
-
-# 3. Assign theme labels and compute spring layout
+# 2. Assign theme labels and compute spring layout
 python scripts/assign_themes.py
 
-# 4. Generate interactive HTML
+# 3. Generate interactive HTML
 python scripts/make_community_html.py
 
-# 5. (Optional) Generate static PNG
+# 4. (Optional) Generate static PNG
 python scripts/make_png.py
 ```
+
+`scripts/detect_communities.py` is an **alternative** to `assign_themes.py` — it
+uses Louvain community detection + TF-IDF to discover themes automatically,
+rather than the manual keyword-based themes in `assign_themes.py`. Both scripts
+write to `data/community_data.pkl`, so run only one of them. The published
+network uses `assign_themes.py` for stable, interpretable theme names.
 
 ### Dependencies
 
@@ -67,13 +70,14 @@ python scripts/make_png.py
 python-docx
 networkx
 python-louvain (community)
+scikit-learn
 matplotlib
 numpy
 ```
 
 Install with:
 ```bash
-pip install python-docx networkx python-louvain matplotlib numpy
+pip install python-docx networkx python-louvain scikit-learn matplotlib numpy
 ```
 
 ## Data

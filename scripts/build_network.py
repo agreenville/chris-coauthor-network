@@ -1,8 +1,12 @@
 import docx
 import re
 import json
+import pathlib
+import pickle
 from collections import defaultdict
 import itertools
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent  # project root
 
 doc = docx.Document(ROOT / 'Chris_pubs.docx')
 paragraphs = [p.text.strip() for p in doc.paragraphs]
@@ -129,11 +133,6 @@ print(f"Total co-authors: {len(chris_coauth_count)}")
 print(f"Top 10: {sorted(chris_coauth_count.items(), key=lambda x: -x[1])[:10]}")
 
 # Save for use in visualisation scripts
-import pickle
-
-import pathlib
-ROOT = pathlib.Path(__file__).resolve().parent.parent  # project root
-
 with open(ROOT / 'data' / 'coauthor_data.pkl', 'wb') as f:
     pickle.dump({
         'chris_coauth_count': dict(chris_coauth_count),
