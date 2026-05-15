@@ -4,8 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
 <title>Chris Dickman Co-authorship Network</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"
+        integrity="sha512-XHDcSyqhOoO2ocB7sKOCJEkUjw/pQCJViP1ynpy+EGh/LggzrP6U/V3a++LQTnZT7sCQKeHRyWHfhN2afjXjCg=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css"
+      rel="stylesheet"
+      integrity="sha512-8OVtKyemDe8Koi/74dnSJughhkwnzqq217zUtUumyvx0Z0kF6H0YYFobH2kEYjKMNq2xNQyN64dnleqecTSL0A=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',Arial,sans-serif;background:#1a1a2e;color:#eee;
@@ -271,6 +278,13 @@ const LEGEND       = [{"id": 0, "colour": "#E69F00", "theme": "Dasyurids & marsu
 const COMM_COLOURS = ["#E69F00", "#F0E442", "#D55E00", "#56B4E9", "#009E73", "#888888"];
 const COMM_BORDERS = ["#a06800", "#a09800", "#903000", "#2070a0", "#006848", "#555555"];
 const MAX_CHRIS    = 57;
+
+// ── HTML-escape helper for any string interpolated into innerHTML ───────────
+function escapeHTML(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
 
 // ── lookup ──────────────────────────────────────────────────────────────────
 var nodeMap = {};
@@ -691,13 +705,13 @@ function init(){
     var n=nodeMap[params.node]; if(!n) return;
     var c=n.community,theme=(c>=0&&c<LEGEND.length)?LEGEND[c].theme:'';
     var col=c>=0?cColour(c):'#aaa';
-    var h='<div class="tt-name">'+n.label+'</div>';
+    var h='<div class="tt-name">'+escapeHTML(n.label)+'</div>';
     if(n.is_chris){
       h+='<div class="tt-row">Publications (with co-authors): <span>'+n.pub_count+'</span></div>';
     } else {
       h+='<div class="tt-row">Co-authored with Chris: <span>'+n.chris_count+' papers</span></div>';
       h+='<div class="tt-row">Total publications listed: <span>'+n.pub_count+'</span></div>';
-      if(theme) h+='<div class="tt-comm" style="background:'+col+'">'+theme+'</div>';
+      if(theme) h+='<div class="tt-comm" style="background:'+col+'">'+escapeHTML(theme)+'</div>';
     }
     tooltip.innerHTML=h; tooltip.style.display='block';
   });
@@ -707,7 +721,7 @@ function init(){
     var l1=fn.is_chris?'Chris Dickman':fn.label;
     var l2=tn.is_chris?'Chris Dickman':tn.label;
     var linkLabel=e._ce?'Papers with Chris: ':'Papers co-authored: ';
-    tooltip.innerHTML='<div class="tt-name">'+l1+' &#8596; '+l2+'</div>'
+    tooltip.innerHTML='<div class="tt-name">'+escapeHTML(l1)+' &#8596; '+escapeHTML(l2)+'</div>'
       +'<div class="tt-row">'+linkLabel+'<span>'+e._w+' paper'+(e._w>1?'s':'')+'</span></div>';
     tooltip.style.display='block';
   });
@@ -893,7 +907,7 @@ function buildLegend(){
     var el=document.createElement('div');
     el.className='leg-item'; el.dataset.comm=entry.id;
     el.innerHTML='<div class="leg-swatch" style="background:'+entry.colour+'"></div>'
-      +'<div><div class="leg-label">'+entry.theme+'</div>'
+      +'<div><div class="leg-label">'+escapeHTML(entry.theme)+'</div>'
       +'<div class="leg-size">'+entry.size+' authors</div></div>';
     el.addEventListener('click',function(){toggleHighlight(entry.id);});
     container.appendChild(el);
@@ -1014,8 +1028,8 @@ function renderSearchResults(matches){
     var col  =COMM_COLOURS[n.community]||'#888';
     return '<div class="sr-item" data-id="'+n.id+'" onmousedown="focusNode('+n.id+')">'
           +'<span class="sr-dot" style="color:'+col+'">&#9679;</span>'
-          +'<span class="sr-name">'+n.label+'</span>'
-          +'<span class="sr-theme">'+theme+'</span>'
+          +'<span class="sr-name">'+escapeHTML(n.label)+'</span>'
+          +'<span class="sr-theme">'+escapeHTML(theme)+'</span>'
           +'</div>';
   }).join('');
   r.style.display='block'; srActiveIdx=-1;
