@@ -6,7 +6,7 @@ An interactive visualisation of co-authorship patterns across Chris Dickman's pu
 
 ## Overview
 
-The network maps 1,057 unique co-authors connected by shared publications. Authors are grouped into six research communities detected by Louvain community detection and labelled by keyword analysis:
+The network maps 1,059 unique co-authors connected by shared publications. Authors are grouped into six research communities detected by Louvain community detection and labelled by keyword analysis:
 
 | Theme | Authors |
 |-------|---------|
@@ -27,16 +27,18 @@ The network maps 1,057 unique co-authors connected by shared publications. Autho
 
 ## Interactive features
 
-- **Theme isolation** — click a theme in the legend to focus on that community
-- **Theme spacing / Node spacing** sliders — adjust layout density
-- **Min papers filter** — show only authors above a co-authorship threshold
-- **Co-author links toggle** — show/hide author-to-author links (weighted by shared publications)
-- **Move themes** mode — drag entire research communities
-- **Search** — find any author by name
-- **Download PNG** — export the current view
+- **? Help guide** — click `? Help` in the toolbar for a step-by-step guided tour of all features
+- **Theme isolation** — click a theme in the legend to focus on that community; click again to deselect and show all authors
+- **Theme spacing / Node spacing** sliders — adjust layout density between and within clusters
+- **Min papers filter** — show only authors above a co-authorship threshold with Chris
+- **Co-author links toggle** — show/hide author-to-author edges (weighted by shared publications)
+- **Move themes** mode — drag entire research communities to rearrange the layout
+- **Search** — find any author by name; selecting a result zooms to and highlights that node
+- **Download PNG** — export the current view as an image
+- **Hover tooltips** — hover any node to see co-authorship details (papers with Chris, total publications, research theme); hover any edge to see the shared paper count
 - Mobile-friendly (portrait and landscape)
 
-Edge thickness and opacity both scale with the number of co-authored papers. Hover any edge to see the paper count.
+Edge thickness and opacity both scale with the number of co-authored papers.
 
 ## Scripts
 
