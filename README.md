@@ -4,6 +4,8 @@
 
 An interactive visualisation of co-authorship patterns across Chris Dickman's publication record, built from ~643 publications spanning his career at the University of Sydney.
 
+This project was created for a celebratory forum and festschrift honouring Chris Dickman's contributions to ecology. A print leaflet (see [`Poster/`](Poster/)) was produced for a stand at the event, with a QR code linking to the live network so attendees could find themselves in it.
+
 ## Overview
 
 The network maps 1,059 unique co-authors connected by shared publications. Authors are grouped into six research communities detected by Louvain community detection and labelled by keyword analysis:
@@ -24,6 +26,20 @@ The network maps 1,059 unique co-authors connected by shared publications. Autho
 | `chris_coauthor_network.html` | Interactive network (open in any browser) |
 | `chris_coauthor_network.png` | Static network — authors with ≥8 co-authored papers |
 | `chris_coauthor_authors.csv` | Full author list with paper counts and theme |
+
+## Poster / leaflet
+
+`Poster/` contains an A4 print leaflet made for the festschrift stand, plus its source files:
+
+| File | Description |
+|------|-------------|
+| `Co-authorship_network_leaflet_A4.pdf` | Print-ready leaflet |
+| `Co-authorship_network_leaflet_A4.docx` / `.html` | Editable source for the leaflet |
+| `network_QR_code.png` | QR code linking to the live network |
+| `chris_coauthor_network3.png` | Network image used on the leaflet |
+| `logo.png` | University of Sydney branding |
+
+`_Archive/` holds superseded static network images, kept for reference only.
 
 ## Interactive features
 
